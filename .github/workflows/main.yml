@@ -1,37 +1,23 @@
-name: Build Kivy App
+name: Build Android APK
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
-  build-linux:
+  build-android:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.9'
-
-    - name: Install Kivy and Build Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-            libsdl2-dev \
-            libsdl2-image-dev \
-            libsdl2-mixer-dev \
-            libsdl2-ttf-dev
-        python -m pip install --upgrade pip
-        pip install kivy pyinstaller
-
-    - name: Build the Executable
-      run: |
-        pyinstaller main.spec
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: linux-app
-        path: dist/LearningApp/
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: buildozer android debug
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-app-apk
+          path: ${{ steps.buildozer.outputs.filename }}
